@@ -1,0 +1,119 @@
+<h1>🗣️ eCounseling</h1>
+
+<!-- Speech-to-text -->
+<textarea id="message" placeholder="Speak your message"></textarea>
+<button onclick="startListening()">Start Speaking</button>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="message" id="hiddenMessage">
+    <button type="submit">Send Message</button>
+</form>
+
+<!-- Display sessions -->
+{% for session in sessions %}
+    <div class="session-card">
+        <p>📢 {{ session.admin_message }}</p>
+        <p>Time: {{ session.session_time }}</p>
+        <p>Venue: {{ session.venue }}</p>
+    </div>
+{% empty %}
+    <p>No counseling sessions yet.</p>
+{% endfor %}
+
+<style>
+body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #f6f8fa;
+        margin: 0;
+        padding: 0;
+}
+h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-top: 30px;
+        font-size: 2.2em;
+        letter-spacing: 1px;
+}
+textarea#message {
+        width: 90%;
+        max-width: 600px;
+        display: block;
+        margin: 20px auto 10px auto;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #b2bec3;
+        font-size: 1.1em;
+        background: #fff;
+        resize: vertical;
+        box-shadow: 0 2px 8px rgba(44,62,80,0.05);
+}
+button {
+        display: block;
+        margin: 10px auto;
+        padding: 10px 28px;
+        background: #0984e3;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.2s;
+}
+button:hover {
+        background: #74b9ff;
+}
+form {
+        text-align: center;
+        margin-bottom: 30px;
+}
+.session-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+        margin: 18px auto;
+        padding: 18px 24px;
+        max-width: 500px;
+        border-left: 5px solid #0984e3;
+}
+.session-card p {
+        margin: 8px 0;
+        font-size: 1.08em;
+        color: #2d3436;
+}
+@media (max-width: 600px) {
+        textarea#message, .session-card {
+                width: 98%;
+                max-width: 98%;
+                padding: 12px;
+        }
+}
+</style>
+
+<script>
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US';
+
+function startListening() {
+        recognition.start();
+}
+
+recognition.onresult = function(event) {
+        let transcript = event.results[0][0].transcript;
+        document.getElementById('message').value = transcript;
+        document.getElementById('hiddenMessage').value = transcript;
+};
+
+// Auto-read admin message
+window.onload = function() {
+        const sessions = document.querySelectorAll('.session-card');
+        let textToSpeak = '';
+        sessions.forEach(card => {
+                textToSpeak += card.innerText + '. ';
+        });
+        if(textToSpeak) {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                window.speechSynthesis.speak(utterance);
+        }
+};
+</script>

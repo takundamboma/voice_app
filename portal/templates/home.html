@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Command Web App</title>
+</head>
+<body>
+  <h1>🎤 Voice Command Portal</h1>
+  <p id="output">Say a command like: "open timetable" or "read announcements"</p>
+  
+  <button onclick="startListening()">Start Voice Command</button>
+  <button onclick="speakText()">Read Out Text</button>
+
+  <script>
+    // 🎤 Voice Recognition
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        let command = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("output").innerText = "You said: " + command;
+
+        if(command.includes("timetable")) {
+    window.location.href = "/timetable/";
+} 
+else if(command.includes("announcements")) {
+    window.location.href = "/announcements/";
+} 
+else if(command.includes("results")) {
+    window.location.href = "/results/";
+}
+
+        // Basic commands
+        if(command.includes("timetable")) {
+          alert("Opening timetable page...");
+        } 
+        else if(command.includes("announcements")) {
+          alert("Reading announcements...");
+          speak("Here are your announcements from the university.");
+        } 
+        else {
+          alert("Command not recognized.");
+        }
+      };
+    }
+
+    // 🔊 Text-to-Speech
+    function speak(text) {
+      const speech = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(speech);
+    }
+
+    function speakText() {
+      let text = document.getElementById("output").innerText;
+      speak(text);
+    }
+  </script>
+</body>
+</html>

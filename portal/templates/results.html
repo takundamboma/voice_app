@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Results</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+  
+  <h1 class="text-2xl font-bold mb-6">📊 Student Results</h1>
+
+  {% if results %}
+    <ul id="results-list" class="space-y-3 bg-white p-6 rounded shadow-md">
+      {% for r in results %}
+        <li class="border-b pb-2">
+          <p><strong>Student:</strong> {{ r.student_name }}</p>
+          <p><strong>Course:</strong> {{ r.course_name }}</p>
+          <p><strong>Grade:</strong> {{ r.grade }}</p>
+          <p class="text-sm text-gray-500">Released: {{ r.date_released|date:"M d, Y" }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-600" id="no-results">No results yet.</p>
+  {% endif %}
+
+  <a href="/" class="mt-6 inline-block bg-blue-700 text-white px-4 py-2 rounded">Back Home</a>
+
+  <script>
+    // ✅ Helper to speak text without cutting off
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1; // normal speed
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // ✅ Read results automatically on load
+    window.onload = function() {
+      const resultsSection = document.getElementById("results-list");
+      const noResults = document.getElementById("no-results");
+
+      if (resultsSection) {
+        let textToRead = "Here are your results. ";
+        const items = resultsSection.querySelectorAll("li");
+
+        items.forEach((item, index) => {
+          textToRead += "Result " + (index + 1) + ": " + item.innerText + ". ";
+        });
+
+        speakText(textToRead);
+      } else if (noResults) {
+        speakText("No results available.");
+      }
+    };
+
+    // ✅ Voice recognition setup
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.lang = "en-US";
+    recognition.start();
+
+    let awaitingConfirmation = false;
+
+    recognition.onresult = function(event) {
+      const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      console.log("Heard:", command);
+
+      if (awaitingConfirmation) {
+        if (command.includes("yes")) {
+          window.history.back();
+        } else if (command.includes("no")) {
+          speakText("Okay, staying on this page.");
+        }
+        awaitingConfirmation = false;
+      }
+      else {
+        if (command.includes("go back")) {
+          speakText("Do you want to go back? Say yes or no.");
+          awaitingConfirmation = true;
+        }
+        else if (command.includes("home")) {
+          window.location.href = "/";
+        }
+      }
+    };
+  </script>
+
+</body>
+</html>

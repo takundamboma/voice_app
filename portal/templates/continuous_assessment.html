@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Continuous Assessment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+
+  <h1 class="text-2xl font-bold mb-6">📘 Continuous Assessment</h1>
+
+  {% if ca_list %}
+    <div id="ca-container" class="space-y-6">
+      {% for ca in ca_list %}
+        <div class="p-6 rounded-lg shadow-md bg-blue-100">
+          <h2 class="text-lg font-semibold">{{ ca.student_name }}</h2>
+          <p><strong>Course:</strong> {{ ca.course_name }}</p>
+          <p><strong>Marks Obtained:</strong> {{ ca.marks_obtained }}</p>
+          <p><strong>Total Marks:</strong> {{ ca.total_marks }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p id="ca-container">No Continuous Assessment records available.</p>
+  {% endif %}
+
+  <a href="/" class="mt-6 inline-block bg-blue-700 text-white px-4 py-2 rounded">Back Home</a>
+
+  <script>
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      window.speechSynthesis.cancel();
+
+      utterance.onend = function() {
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 10000); // 10 seconds after speech
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Auto-read CA when page loads
+    window.onload = function() {
+      const caContainer = document.getElementById("ca-container");
+
+      if (caContainer) {
+        let textToRead = "Here are your continuous assessment results. ";
+        const cards = caContainer.querySelectorAll("div");
+
+        if (cards.length > 0) {
+          cards.forEach((card, index) => {
+            textToRead += "Student " + (index + 1) + ": " + card.innerText + ". ";
+          });
+          textToRead += "You will be redirected to the home page in 10 seconds.";
+        } else {
+          textToRead = "No continuous assessment records available.";
+        }
+
+        speakText(textToRead);
+      }
+    };
+
+    // Voice commands
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        console.log("Heard:", command);
+
+        if (command.includes("go back")) {
+          window.history.back();
+        } else if (command.includes("home")) {
+          window.location.href = "/";
+        }
+      };
+    }
+  </script>
+
+</body>
+</html>

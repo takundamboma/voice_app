@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fees Structure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+
+  <h1 class="text-2xl font-bold mb-6">💰 Fees Structure</h1>
+
+  {% if fees_list %}
+    <div id="fees-container" class="space-y-6">
+      {% for fee in fees_list %}
+        <div class="p-6 rounded-lg shadow-md 
+          {% if fee.is_registered %}
+            bg-green-200
+          {% else %}
+            bg-yellow-200
+          {% endif %}
+        ">
+          <h2 class="text-lg font-semibold">{{ fee.student_name }}</h2>
+          <p><strong>Total Fees:</strong> ${{ fee.total_amount }}</p>
+          <p><strong>Amount Paid:</strong> ${{ fee.amount_paid }}</p>
+          <p><strong>Amount Left:</strong> ${{ fee.amount_left }}</p>
+
+          {% if fee.is_registered %}
+            <p class="text-green-900 font-bold">✅ Registered</p>
+          {% else %}
+            <p class="text-yellow-900 font-bold">⚠️ Not Yet Registered</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p id="fees-container">No fee records available.</p>
+  {% endif %}
+
+  <a href="/" class="mt-6 inline-block bg-blue-700 text-white px-4 py-2 rounded">Back Home</a>
+
+  <script>
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      window.speechSynthesis.cancel(); // stop overlapping voices
+
+      // When speech ends, wait 10s then go home
+      utterance.onend = function() {
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 10000); // 10 seconds
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Auto-read fees when page loads
+    window.onload = function() {
+      const feesContainer = document.getElementById("fees-container");
+
+      if (feesContainer) {
+        let textToRead = "Here is the fees structure. ";
+        const cards = feesContainer.querySelectorAll("div");
+
+        if (cards.length > 0) {
+          cards.forEach((card, index) => {
+            textToRead += "Student " + (index + 1) + ": " + card.innerText + ". ";
+          });
+        } else {
+          textToRead = "No fee records available.";
+        }
+
+        speakText(textToRead);
+      }
+    };
+
+    // Voice commands
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        console.log("Heard:", command);
+
+        if (command.includes("go back")) {
+          window.history.back();
+        } else if (command.includes("home")) {
+          window.location.href = "/";
+        }
+      };
+    }
+  </script>
+
+</body>
+</html>

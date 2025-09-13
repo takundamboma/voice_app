@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Student Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white shadow-md rounded-lg p-6 w-96">
+    <h1 class="text-xl font-bold mb-4">🔐 Student Login</h1>
+
+    <form method="POST" id="loginForm">
+      {% csrf_token %}
+      <label class="block mb-2 font-semibold">Registration Number</label>
+      <input type="text" id="reg_number" name="reg_number" required class="w-full border p-2 rounded mb-4">
+      <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
+    </form>
+
+    <button onclick="startVoiceLogin()" class="mt-4 w-full bg-green-600 text-white p-2 rounded">🎤 Speak Reg Number</button>
+
+    {% if messages %}
+      <div class="mt-4 text-red-600">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+
+    function startVoiceLogin() {
+      recognition.start();
+      recognition.onresult = function(event) {
+        let spokenText = event.results[0][0].transcript.replace(/\s+/g, "").toUpperCase();
+        document.getElementById("reg_number").value = spokenText;
+        document.getElementById("loginForm").submit();
+      };
+    }
+  </script>
+
+</body>
+</html>

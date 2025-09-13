@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>University Voice Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+ <aside class="w-64 bg-blue-900 text-white flex flex-col h-screen overflow-y-auto sticky top-0">
+  <div class="p-6 font-bold text-xl border-b border-blue-700">
+      🎓 My University
+    </div>
+    <nav class="flex-1 p-4">
+      <ul class="space-y-3">
+        <li><a href="/" class="hover:bg-blue-700 block p-2 rounded">Dashboard</a></li>
+        <li><a href="/timetable/" class="hover:bg-blue-700 block p-2 rounded">Timetables</a></li>
+        <li><a href="/announcements/" class="hover:bg-blue-700 block p-2 rounded">Announcements</a></li>
+        <li><a href="/results/" class="hover:bg-blue-700 block p-2 rounded">Results</a></li>
+        <li><a href="/fees/" class="hover:bg-blue-700 block p-2 rounded">Fees Structure</a></li>
+        <li><a href="/fees/" class="hover:bg-blue-700 block p-2 rounded">Financials</a></li>
+        <li><a href="/library/" class="hover:bg-blue-700 block p-2 rounded">Library</a></li>
+        <li><a href="/ecounseling/" class="hover:bg-blue-700 block p-2 rounded">eCounseling</a></li>
+        <li><a href="/continiousassessment/" class="hover:bg-blue-700 block p-2 rounded">Continious Assessment</a></li>
+        <li><a href="/evaluation/" class="hover:bg-blue-700 block p-2 rounded">Evaluations</a></li>
+        <li><a href="/profile/" class="hover:bg-blue-700 block p-2 rounded">Profile</a></li>
+        <li><a href="/settings/" class="hover:bg-blue-700 block p-2 rounded">Settings</a></li>
+        <li><a href="/logout/" class="hover:bg-red-600 block p-2 rounded">Logout</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8">
+    <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+
+    <!-- Example Notice -->
+   <!-- Announcements Section -->
+<div class="bg-white p-6 rounded shadow-md mb-6">
+  <h2 class="text-lg font-semibold mb-4">📢 Latest Announcements</h2>
+  
+  {% if announcements %}
+    <ul class="space-y-4">
+      {% for ann in announcements %}
+        <li class="border-b pb-2">
+          <h3 class="font-bold text-blue-800">{{ ann.title }}</h3>
+          <p>{{ ann.message }}</p>
+          <p class="text-sm text-gray-500">Posted on: {{ ann.date_posted|date:"M d, Y H:i" }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-600">No announcements yet.</p>
+  {% endif %}
+</div>
+
+<div class="bg-white p-6 rounded shadow-md mb-6">
+  <h2 class="text-lg font-semibold mb-4">📊 Student Results</h2>
+
+  {% if results %}
+    <ul class="space-y-3">
+      {% for r in results %}
+        <li class="border-b pb-2">
+          <p><strong>Student:</strong> {{ r.student_name }}</p>
+          <p><strong>Course:</strong> {{ r.course_name }}</p>
+          <p><strong>Grade:</strong> {{ r.grade }}</p>
+          <p class="text-sm text-gray-500">Released: {{ r.date_released|date:"M d, Y" }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-600">No results yet.</p>
+  {% endif %}
+</div>
+<!-- Fees Structure Card -->
+<!-- Fees Structure Card -->
+<div class="mt-6 p-6 rounded-lg shadow-md
+  {% if fees_list and fees_list.0.is_registered %}
+    bg-green-200
+  {% else %}
+    bg-yellow-200
+  {% endif %}
+">
+  <h2 class="text-lg font-semibold">💰 Fees Structure</h2>
+
+  {% if fees_list %}
+    <p><strong>Latest Update for:</strong> {{ fees_list.0.student_name }}</p>
+    <p><strong>Paid:</strong> ${{ fees_list.0.amount_paid }} / ${{ fees_list.0.total_amount }}</p>
+    <p><strong>Left:</strong> ${{ fees_list.0.amount_left }}</p>
+
+    {% if fees_list.0.is_registered %}
+      <p class="text-green-900 font-bold">✅ Registered</p>
+    {% else %}
+      <p class="text-yellow-900 font-bold">⚠️ Not Yet Registered</p>
+    {% endif %}
+  {% else %}
+    <p>No fee records available.</p>
+  {% endif %}
+
+  <a href="/fees/" class="mt-4 inline-block bg-blue-700 text-white px-4 py-2 rounded">View Full Fees</a>
+</div>
+
+
+
+    <!-- Voice Assistant -->
+    <div class="bg-gray-200 p-6 rounded shadow-md">
+      <h2 class="text-lg font-semibold mb-3">🎤 Voice Assistant</h2>
+      <p id="output" class="mb-3">Say a command like: "open timetable" or "read announcements".</p>
+      <button onclick="startListening()" class="bg-blue-700 text-white px-4 py-2 rounded mr-2">Start Listening</button>
+      <button onclick="speakText()" class="bg-green-600 text-white px-4 py-2 rounded">Read Aloud</button>
+    </div>
+  </main>
+
+  <!-- Voice Script -->
+  <script>
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        let command = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("output").innerText = "You said: " + command;
+
+        if(command.includes("timetable")) {
+          window.location.href = "/timetable/";
+        } else if(command.includes("announcements")) {
+          window.location.href = "/announcements/";
+        } else if(command.includes("results")) {
+          window.location.href = "/results/";
+        } else {
+          alert("Command not recognized.");
+        }
+      };
+    }
+
+    function speak(text) {
+      const speech = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(speech);
+    }
+
+    function speakText() {
+      let text = document.getElementById("output").innerText;
+      speak(text);
+    }
+    
+  // Speak helper
+  function speak(text) {
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.rate = 1;  // speed
+    speech.pitch = 1; // tone
+    speech.lang = "en-US";
+    window.speechSynthesis.speak(speech);
+  }
+
+  // Read announcements automatically on page load
+  window.onload = function() {
+    let announcements = [
+      {% for ann in announcements %}
+        "{{ ann.title }}. {{ ann.message }}",
+      {% endfor %}
+    ];
+
+    if (announcements.length > 0) {
+      let textToSpeak = "Here are the latest announcements. " + announcements.join(" Next, ");
+      speak(textToSpeak);
+    } else {
+      speak("There are no announcements at the moment.");
+    }
+  };
+function startListening() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    let command = event.results[0][0].transcript.toLowerCase();
+    document.getElementById("output").innerText = "You said: " + command;
+
+    if (command.includes("timetable")) {
+      window.location.href = "/timetable/";
+
+    } else if (command.includes("announcements")) {
+      window.location.href = "/announcements/";
+
+    } else if (command.includes("results")) {
+      window.location.href = "/results/";
+
+    } else if (command.includes("go back")) {
+      // Ask for confirmation
+      speak("Do you want to go back?");
+      confirmGoBack();
+
+    } else if (command.includes("go home")) {
+      window.location.href = "/";
+
+    } else {
+      speak("Command not recognized.");
+    }
+  };
+}
+
+function speak(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(speech);
+}
+
+function speakText() {
+  let text = document.getElementById("output").innerText;
+  speak(text);
+}
+
+// Confirmation logic
+function confirmGoBack() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    let reply = event.results[0][0].transcript.toLowerCase();
+    if (reply.includes("yes")) {
+      window.history.back();
+    } else {
+      speak("Okay, staying on this page.");
+    }
+  };
+}
+
+
+  </script>
+</body>
+</html>
